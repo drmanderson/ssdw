@@ -156,6 +156,26 @@ function addToQueue(message) {
   processQueue();
 }
 
+async function sendWithRateLimit(WwebhookUrl, payload) {
+  try {
+    const response = await axios.post(webhookUrl, payload);
+    console.log(`Message sent to Discord: ${message.content}`);
+  } catch (error) {
+    if (error.response && error.response.status === 429) {
+      const retryAfter = error.response.headers["retry-after"];
+      const waitMS = retryAfter ? parseFloat(retryAfter) * 1000 : 5000;
+
+      console.warn(`⚠️ Rate limited! Retrying in ${waitMs / 1000} seconds.`);
+      // Wait and retry
+      setTimeout(() => {
+        sendWithRateLimit(webhookUrl, payload);
+      }, waitMs);
+    } else {
+      console.error('❌ Error sending message:', error.message);
+    }
+
+}
+
 async function processQueue() {
   if (isProcessing) return;
 
@@ -164,31 +184,7 @@ async function processQueue() {
   while (queue.length > 0) {
     const message = queue.shift();
 
-    try {
-      await axios
-        .post(WEBHOOK_URL, message)
-        .then(() => {
-          console.log(`Message sent to Discord: ${message.content}`);
-        })
-        .catch((err) =>
-          console.error("Error sending message to Discord: ", err.message)
-        );
-    } catch (error) {
-      if (error.response && error.response.status === 429) {
-        console.log("Rate limit hit! Waiting...");
-        const retryAfter =
-          parseInt(error.response.headers["retry-after"], 10) || 1000;
-        console.log(`Waiting for ${retryAfter}ms before retrying...`);
-        await new Promise((resolve) => setTimeout(resolve, retryAfter));
-        continue;
-      } else {
-        console.error("Error sending message:", error.message);
-        break;
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
+    sendWithRateLimit(WEBHOOK_URL,message);
 
   isProcessing = false;
 }
