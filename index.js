@@ -156,14 +156,14 @@ function addToQueue(message) {
   processQueue();
 }
 
-async function sendWithRateLimit(WwebhookUrl, payload) {
+async function sendWithRateLimit(message) {
   try {
-    const response = await axios.post(webhookUrl, payload);
+    const response = await axios.post(WEBHOOK_URL, message);
     console.log(`Message sent to Discord: ${message.content}`);
   } catch (error) {
     if (error.response && error.response.status === 429) {
       const retryAfter = error.response.headers["retry-after"];
-      const waitMS = retryAfter ? parseFloat(retryAfter) * 1000 : 5000;
+      const waitMs = retryAfter ? parseFloat(retryAfter) * 1000 : 5000;
 
       console.warn(`⚠️ Rate limited! Retrying in ${waitMs / 1000} seconds.`);
       // Wait and retry
@@ -173,7 +173,7 @@ async function sendWithRateLimit(WwebhookUrl, payload) {
     } else {
       console.error('❌ Error sending message:', error.message);
     }
-
+  }
 }
 
 async function processQueue() {
@@ -183,9 +183,8 @@ async function processQueue() {
 
   while (queue.length > 0) {
     const message = queue.shift();
-
-    sendWithRateLimit(WEBHOOK_URL,message);
-
+    sendWithRateLimit(message);
+  }
   isProcessing = false;
 }
 
