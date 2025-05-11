@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  steam-sales-discord-webhook:
+    image: steam-sales-discord-webhook:latest  # Replace with your local image name and tag
+    environment:
+      - WEBHOOK_URL=FILL THIS IN
+      - POLLING_INTERVAL=1
+    ports: []
