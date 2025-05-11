@@ -4,20 +4,15 @@ This simple script will check for steam games on sale and send a message of them
 
 ## Set Up
 Before running the script, you will need to create a webhook in your discord server and point it to a channel of your choice. 
-Then create a .env file in the root of the script folder and paste the following:
+Then add the values to the docker-compose.yml:
 ```
 WEBHOOK_URL= # the url of your discord webhook
 POLLING_INTERVAL= # how often the script should check for new games in hours
 ```
-Finally, open the file path in your terminal and enter:
-```
-npm install
-```
-This will install all the necessary packages the script need to run.
+Finally, to build and run:
 
-## Running
-Open the file path in your terminal and enter the following:
 ```
-node index.js
+docker compose up -d
 ```
-This will then run the script and start sending messages in discord. There will be alot of messages at first as there are a lot of offers to get through at the start.
+
+This will then build a docker container and run the script. This will start sending messages into discord. There will be alot of messages at first as there are a lot of offers to get through at the start.
